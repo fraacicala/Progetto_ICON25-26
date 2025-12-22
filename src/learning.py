@@ -30,47 +30,48 @@ def preprocessing_dataset(df):
     return X, y
 
 def decisiontree_classifier(X,y):
-    skf = StratifiedKFold(n_splits=5, shuffle=True)
-    model = DecisionTreeClassifier(random_state=42)
-    parametri = {
+    inner_loop = StratifiedKFold(n_splits=5,shuffle=True,random_state=0)
+    outer_loop = StratifiedKFold(n_splits=5,shuffle=True,random_state=0)
+    model = DecisionTreeClassifier(random_state=0)
+    param_grid = {
         'criterion': ['gini', 'entropy'],
-        'max_depth': [3, 5, 10],
-        'min_samples_split': [2, 5],
-        'min_samples_leaf': [1, 2, 5]
+        'max_depth': range(1,10,1),
+        'min_samples_split': range(2,20,2),
+        'min_samples_leaf': range(1,20,2)
     }
-    grid_search = GridSearchCV(model, parametri, cv=skf)
-    grid_search.fit(X, y)
-    best_model = grid_search.best_estimator_
-    print(f"Parametri migliori:  {grid_search.best_params_}")
-    metriche = ['accuracy','precision_weighted','recall_weighted','f1_weighted']
-    risultati = cross_validate(best_model, X, y, cv=skf, scoring=metriche)
-    print(f"Accuracy:  {risultati['test_accuracy'].mean():.2%} (+/- {risultati['test_accuracy'].std():.2%})")
-    print(f"Precision Media: {risultati['test_precision_weighted'].mean():.2%}")
-    print(f"Recall Media:    {risultati['test_recall_weighted'].mean():.2%}")
-    print(f"F1-Score Media:  {risultati['test_f1_weighted'].mean():.2%}")
+    grid = GridSearchCV(estimator=model, param_grid=param_grid, cv=inner_loop)
+    metrics = ['accuracy', 'precision_weighted', 'recall_weighted', 'f1_weighted']
+    nested_results = cross_validate(grid, X, y, cv=outer_loop, scoring=metrics)
+    print(f"Accuracy Media (Nested):  {nested_results['test_accuracy'].mean():.2%} (+/- {nested_results['test_accuracy'].std():.2%})")
+    print(f"Precision Media (Nested): {nested_results['test_precision_weighted'].mean():.2%}")
+    print(f"Recall Media (Nested):    {nested_results['test_recall_weighted'].mean():.2%}")
+    print(f"F1-Score Media (Nested):  {nested_results['test_f1_weighted'].mean():.2%}")
+    grid.fit(X, y)
+    best_model = grid.best_estimator_
+    print(f"Parametri migliori:  {grid.best_params_}")
     mostra_curva_apprendimento(best_model, X, y, title="Learning Curve - Decision Tree")
     return best_model
 
 def randomforest_classifier(X,y):
-    skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-    model = RandomForestClassifier(random_state= 42, class_weight='balanced')
-    parametri = {
+    inner_loop = StratifiedKFold(n_splits=5, shuffle=True, random_state=0)
+    outer_loop = StratifiedKFold(n_splits=5, shuffle=True, random_state=0)
+    model = RandomForestClassifier(random_state=0, class_weight='balanced')
+    param_grid = {
         'n_estimators': [50, 100],
         'criterion': ['gini', 'entropy'],
-        'max_depth': [None, 3, 5, 10],
+        'max_depth': [3, 5, 10],
         'min_samples_split': [2, 5, 10],
-        'min_samples_leaf': [1, 2, ]
+        'min_samples_leaf': [1, 2, 5]
     }
-    grid_search = GridSearchCV(model, parametri, cv=skf)
-    grid_search.fit(X, y)
-    best_model = grid_search.best_estimator_
-    print(f"Parametri migliori:  {grid_search.best_params_}")
-    metriche = ['accuracy','precision_weighted','recall_weighted','f1_weighted']
-    risultati = cross_validate(best_model, X, y, cv=skf, scoring=metriche)
-    print(f"Accuracy:  {risultati['test_accuracy'].mean():.2%} (+/- {risultati['test_accuracy'].std():.2%})")
-    print(f"Precision Media: {risultati['test_precision_weighted'].mean():.2%}")
-    print(f"Recall Media:    {risultati['test_recall_weighted'].mean():.2%}")
-    print(f"F1-Score Media:  {risultati['test_f1_weighted'].mean():.2%}")
+    grid= GridSearchCV(estimator=model, param_grid=param_grid, cv=inner_loop)
+    metrics = ['accuracy', 'precision_weighted', 'recall_weighted', 'f1_weighted']
+    nested_results = cross_validate(grid, X, y, cv=outer_loop, scoring=metrics)
+    print(f"Accuracy Media (Nested):  {nested_results['test_accuracy'].mean():.2%} (+/- {nested_results['test_accuracy'].std():.2%})")
+    print(f"Precision Media (Nested): {nested_results['test_precision_weighted'].mean():.2%}")
+    print(f"Recall Media (Nested):    {nested_results['test_recall_weighted'].mean():.2%}")
+    print(f"F1-Score Media (Nested):  {nested_results['test_f1_weighted'].mean():.2%}")
+    best_model = grid.best_estimator_
+    print(f"Parametri migliori:  {grid.best_params_}")
     mostra_curva_apprendimento(best_model, X, y, title="Learning Curve - Random Forest")
     return best_model
 
