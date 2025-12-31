@@ -70,6 +70,7 @@ def randomforest_classifier(X,y):
     print(f"Precision Media (Nested): {nested_results['test_precision_weighted'].mean():.2%}")
     print(f"Recall Media (Nested):    {nested_results['test_recall_weighted'].mean():.2%}")
     print(f"F1-Score Media (Nested):  {nested_results['test_f1_weighted'].mean():.2%}")
+    grid.fit(X, y)
     best_model = grid.best_estimator_
     print(f"Parametri migliori:  {grid.best_params_}")
     mostra_curva_apprendimento(best_model, X, y, title="Learning Curve - Random Forest")

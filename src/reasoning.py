@@ -1,5 +1,6 @@
 from owlready2 import *
 import pandas as pd
+import os
 
 #Funzione che carica l'ontologia specificata
 def load_ontology(path):
@@ -23,6 +24,33 @@ def populate_ontology():
         output =  os.path.join(os.path.dirname(__file__), '..', 'ontology', 'himym_populated.rdf')
         onto.save(output)
 
+def run_reasoning():
+    path_ontology = os.path.join(os.path.dirname(__file__), '..', 'ontology', 'himym_populated.rdf')
+    onto = load_ontology(path_ontology)
+    with onto:
+        sync_reasoner(infer_property_values=True)
+    semantic_results = {}
+    if hasattr(onto, "Episodio"):
+        episode_list = onto.Episodio.instances()
+    for ep in episode_list:
+        name = ep.name  # Es. Episode_S01_E01
+        if hasattr(onto, "Episodio_chiave") and ep in onto.Episodio_chiave.instances():
+            target= "Eccellente"
+
+        elif hasattr(onto, "Episodio_filler") and ep in onto.Episodio_filler.instances():
+            target = "Scarso"
+
+        else:
+            target = "Buono"
+
+        semantic_results[name] = target
+
+    print(f" -> Classificazione semantica completata per {len(episode_list)} episodi.")
+    return semantic_results
+
+# Test per vedere se funziona da solo
 if __name__ == "__main__":
-    populate_ontology()
+    risultati = run_reasoning()
+
+
 
