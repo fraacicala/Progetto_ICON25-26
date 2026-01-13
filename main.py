@@ -8,28 +8,6 @@ import numpy as np
 from sklearn.preprocessing import LabelEncoder
 
 
-# ===================================================================
-#   FUNZIONE DI UTILITY PER I GRAFICI (aggiunta qui per non toccare altri file)
-# ===================================================================
-def mostra_feature_importance(model, feature_names, title):
-    """
-    Genera e mostra un grafico a barre orizzontali per l'importanza delle feature.
-    """
-    if hasattr(model, 'feature_importances_'):
-        importances = model.feature_importances_
-        indices = np.argsort(importances)
-
-        plt.figure(figsize=(10, 7))
-        plt.title(title, fontsize=16)
-        plt.barh(range(len(indices)), importances[indices], color='darkorange', align='center')
-        plt.yticks(range(len(indices)), [feature_names[i] for i in indices])
-        plt.xlabel("Importanza Relativa (Gini Importance)", fontsize=12)
-        plt.tight_layout()
-        plt.show()
-    else:
-        print(f"[ATTENZIONE] Il modello {type(model).__name__} non ha l'attributo 'feature_importances_'.")
-
-
 def main():
     """
     Orchestratore dell'esperimento comparativo ML vs ML+OntoBK.
@@ -52,13 +30,11 @@ def main():
 
     print("\n[INFO] Addestramento e valutazione del Decision Tree (Baseline)...")
     dt_model_orig = learning.decisiontree_classifier(X_orig, y_orig)
-    # --- AGGIUNTA #1 ---
-    mostra_feature_importance(dt_model_orig, feature_names_orig, "Feature Importance - DT (Baseline)")
+
 
     print("\n[INFO] Addestramento e valutazione del Random Forest (Baseline)...")
     rf_model_orig = learning.randomforest_classifier(X_orig, y_orig)
-    # --- AGGIUNTA #2 ---
-    mostra_feature_importance(rf_model_orig, feature_names_orig, "Feature Importance - RF (Baseline)")
+
 
     print("\n--- [SCENARIO 1] COMPLETATO ---")
 
@@ -106,13 +82,11 @@ def main():
 
     print("\n[INFO] Addestramento e valutazione del Decision Tree (con BK)...")
     dt_model_arr = learning.decisiontree_classifier(X_arr, y_arr)
-    # --- AGGIUNTA #3 ---
-    mostra_feature_importance(dt_model_arr, feature_names_arr, "Feature Importance - DT (con BK)")
+
 
     print("\n[INFO] Addestramento e valutazione del Random Forest (con BK)...")
     rf_model_arr = learning.randomforest_classifier(X_arr, y_arr)
-    # --- AGGIUNTA #4 ---
-    mostra_feature_importance(rf_model_arr, feature_names_arr, "Feature Importance - RF (con BK)")
+
 
     print("\n--- [SCENARIO 2] COMPLETATO ---")
     print("\n===================================================================")
